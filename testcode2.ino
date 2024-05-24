@@ -383,6 +383,10 @@ uint8_t getFingerprintID() {
     return p;
   } else if (p == FINGERPRINT_NOTFOUND) {
     //Serial.println("Did not find a match");
+    lcd.setCursor(0, 0);
+    lcd.print("Access Denied");
+    delay(3000);
+    lcd.clear();
     return p;
   } else {
     //Serial.println("Unknown error");

@@ -21,14 +21,15 @@ int echoPin = 3;
 //층별 정보 저장
 struct Employee {
   int id;
+  int high;
   const char* name;
   const char* floor;
 };
 
 Employee employees[] = {
-  {1, "seonghwan", "1st floor"},
-  {2, "yeonseo", "2nd floor"},
-  {3, "minjeong", "3rd floor"}
+  {1, 0, "seonghwan", "1st floor"},
+  {2, 12, "yeonseo", "2nd floor"},
+  {3, 24, "minjeong", "3rd floor"}
 };
 
 void setup() {
@@ -85,7 +86,7 @@ void setup() {
  
 }
 
-//지문 id를 읽어 오는 함수
+//시리얼 모니터에 지문 id를 입력
 uint8_t readnumber(void) {
   uint8_t num = 0;
 
@@ -116,18 +117,17 @@ void loop() {
       delay(100);
 
     case 3:
-       Serial.println("Please type in the ID # (from 1 to 127) you want to delete...");
+      Serial.println("Please type in the ID # (from 1 to 127) you want to delete...");
       uint8_t id = readnumber();
       if (id == 0) {// ID #0 not allowed, try again!
         return;
-  }
+      }
 
-  Serial.print("Deleting ID #");
-  Serial.println(id);
+      Serial.print("Deleting ID #");
+      Serial.println(id);
 
-  deleteFingerprint(id);
-  
-  }
+      deleteFingerprint(id);
+}
 
   if (dist() >0 && dist() < 10) {
     displayEmployee(employees[0]);
@@ -334,19 +334,19 @@ uint8_t getFingerprintID() {
   uint8_t p = finger.getImage();
   switch (p) {
     case FINGERPRINT_OK:
-      Serial.println("Image taken");
+      //Serial.println("Image taken");
       break;
     case FINGERPRINT_NOFINGER:
-      Serial.println("No finger detected");
+      //Serial.println("No finger detected");
       return p;
     case FINGERPRINT_PACKETRECIEVEERR:
-      Serial.println("Communication error");
+      //Serial.println("Communication error");
       return p;
     case FINGERPRINT_IMAGEFAIL:
-      Serial.println("Imaging error");
+      //Serial.println("Imaging error");
       return p;
     default:
-      Serial.println("Unknown error");
+      //Serial.println("Unknown error");
       return p;
   }
 
@@ -355,61 +355,49 @@ uint8_t getFingerprintID() {
   p = finger.image2Tz();
   switch (p) {
     case FINGERPRINT_OK:
-      Serial.println("Image converted");
+      //Serial.println("Image converted");
       break;
     case FINGERPRINT_IMAGEMESS:
-      Serial.println("Image too messy");
+      //Serial.println("Image too messy");
       return p;
     case FINGERPRINT_PACKETRECIEVEERR:
-      Serial.println("Communication error");
+      //Serial.println("Communication error");
       return p;
     case FINGERPRINT_FEATUREFAIL:
-      Serial.println("Could not find fingerprint features");
+      //Serial.println("Could not find fingerprint features");
       return p;
     case FINGERPRINT_INVALIDIMAGE:
-      Serial.println("Could not find fingerprint features");
+      //Serial.println("Could not find fingerprint features");
       return p;
     default:
-      Serial.println("Unknown error");
+      //Serial.println("Unknown error");
       return p;
   }
 
   // OK converted!
   p = finger.fingerSearch();
   if (p == FINGERPRINT_OK) {
-    Serial.println("Found a print match!");
+    //Serial.println("Found a print match!");
   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
-    Serial.println("Communication error");
+    //Serial.println("Communication error");
     return p;
   } else if (p == FINGERPRINT_NOTFOUND) {
-    Serial.println("Did not find a match");
+    //Serial.println("Did not find a match");
     return p;
   } else {
-    Serial.println("Unknown error");
+    //Serial.println("Unknown error");
     return p;
   }
 
   // found a match!
-  Serial.print("Found ID #"); Serial.print(finger.fingerID);
-  Serial.print(" with confidence of "); Serial.println(finger.confidence);
+  //lcd 표시 
+  displayEmployee(employees[finger.fingerID]);
 
-  return finger.fingerID;
-}
+  
 
-// returns -1 if failed, otherwise returns ID #
-int getFingerprintIDez() {
-  uint8_t p = finger.getImage();
-  if (p != FINGERPRINT_OK)  return -1;
+  //Serial.print("Found ID #"); Serial.print(finger.fingerID);
+  //Serial.print(" with confidence of "); Serial.println(finger.confidence);
 
-  p = finger.image2Tz();
-  if (p != FINGERPRINT_OK)  return -1;
-
-  p = finger.fingerFastSearch();
-  if (p != FINGERPRINT_OK)  return -1;
-
-  // found a match!
-  Serial.print("Found ID #"); Serial.print(finger.fingerID);
-  Serial.print(" with confidence of "); Serial.println(finger.confidence);
   return finger.fingerID;
 }
 

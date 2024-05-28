@@ -1,0 +1,100 @@
+#include <Adafruit_Fingerprint.h>
+#include <LiquidCrystal_I2C.h>
+#include<Wire.h>
+#include <Servo.h>
+
+//지문인식 센서
+SoftwareSerial mySerial(2, 3);
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
+uint8_t id;
+
+//lcd 센서
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+//서보모터 센서
+Servo high;
+int angle = 90;
+
+//초음파 센서 설정
+int trigPin = 4;
+int echoPin = 5;
+
+//층별 정보 저장
+struct Employee {
+  int id;
+  int high;
+  const char* name;
+  const char* floor;
+};
+
+Employee employees[] = {
+  {1, 0, "seonghwan", "1st floor"},
+  {2, 12, "yeonseo", "2nd floor"},
+  {3, 24, "minjeong", "3rd floor"}
+};
+void setup() {
+  //시리얼 모니터 시작
+  Serial.begin(9600);
+
+  //lcd 시작
+  lcd.init();
+  lcd.backlight();
+  lcd.begin(16,2);
+  lcd.clear();
+  
+  //초음파 센서 pinMode
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  //서보모터 pinMode
+  high.attach(12);
+
+  //엑셀에 출력될 라벨(타이틀) 출력
+  Serial.println("CREARDATA");
+  Serial.println("LABEL, TIME, ID, NAME, LOG");
+
+  //지문인식 센서 시작
+  while (!Serial);  // For Yun/Leo/Micro/Zero/...
+  delay(100);
+  Serial.println("\n\nAdafruit Fingerprint sensor enrollment");
+
+  // set the data rate for the sensor serial port
+  finger.begin(57600);
+
+  //지문인식 센서 디바이스 확인
+  if (finger.veri력
+    delay(3000);
+    lcd.clear();
+    return p;
+  } else {
+    Serial.println("Unknown error");
+    return p;
+  }
+
+  // found a match!
+  Serial.print("Found ID #"); Serial.print(finger.fingerID);
+  Serial.print(" with confidence of "); Serial.println(finger.confidence);
+
+  return finger.fingerID;
+}
+
+//지문 삭제 delete
+uint8_t deleteFingerprint(uint8_t id) {
+  uint8_t p = -1;
+
+  p = finger.deleteModel(id);
+
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Deleted!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+  } else if (p == FINGERPRINT_BADLOCATION) {
+    Serial.println("Could not delete in that location");
+  } else if (p == FINGERPRINT_FLASHERR) {
+    Serial.println("Error writing to flash");
+  } else {
+    Serial.print("Unknown error: 0x"); Serial.println(p, HEX);
+  }
+
+  return p;
+}
